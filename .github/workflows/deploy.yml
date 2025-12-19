@@ -1,0 +1,72 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo, pdo_sqlite, sqlite3
+
+      - name: Validate PHP syntax
+        run: |
+          find . -name "*.php" -not -path "./vendor/*" -exec php -l {} \;
+
+      # Option 1: Deploy via FTP
+      # Uncomment and configure if using FTP deployment
+      # - name: Deploy via FTP
+      #   uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      #   with:
+      #     server: ${{ secrets.FTP_SERVER }}
+      #     username: ${{ secrets.FTP_USERNAME }}
+      #     password: ${{ secrets.FTP_PASSWORD }}
+      #     server-dir: /public_html/
+
+      # Option 2: Deploy via SSH
+      # Uncomment and configure if using SSH deployment
+      # - name: Deploy via SSH
+      #   uses: appleboy/ssh-action@v1.0.0
+      #   with:
+      #     host: ${{ secrets.SSH_HOST }}
+      #     username: ${{ secrets.SSH_USERNAME }}
+      #     key: ${{ secrets.SSH_PRIVATE_KEY }}
+      #     script: |
+      #       cd /var/www/notes-app
+      #       git pull origin main
+      #       chmod -R 755 .
+      #       chmod -R 777 data/
+
+      # Option 3: Deploy to shared hosting via rsync
+      # Uncomment and configure if using rsync
+      # - name: Deploy via rsync
+      #   uses: burnett01/rsync-deployments@5.2.1
+      #   with:
+      #     switches: -avzr --delete --exclude='.git' --exclude='data/'
+      #     path: ./
+      #     remote_path: ${{ secrets.DEPLOY_PATH }}
+      #     remote_host: ${{ secrets.SSH_HOST }}
+      #     remote_user: ${{ secrets.SSH_USERNAME }}
+      #     remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Deployment placeholder
+        run: |
+          echo "✅ Code validated and ready for deployment"
+          echo "Configure one of the deployment options above with your server details"
+          echo ""
+          echo "Required secrets to add in GitHub repository settings:"
+          echo "  - FTP: FTP_SERVER, FTP_USERNAME, FTP_PASSWORD"
+          echo "  - SSH: SSH_HOST, SSH_USERNAME, SSH_PRIVATE_KEY"
+          echo "  - Rsync: SSH_HOST, SSH_USERNAME, SSH_PRIVATE_KEY, DEPLOY_PATH"
