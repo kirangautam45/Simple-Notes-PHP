@@ -2,6 +2,9 @@
 $pageTitle = 'All Notes';
 require_once 'includes/header.php';
 
+// Require login to access notes
+requireLogin();
+
 // Handle pin toggle
 if (isset($_GET['pin'])) {
     $id = (int)$_GET['pin'];
@@ -22,7 +25,6 @@ $pinnedNotes = count(array_filter($notes, fn($n) => $n['is_pinned']));
 
 <div class="page-header">
     <h1>My Notes</h1>
-    <a href="create.php" class="btn btn-primary">+ New Note</a>
 </div>
 
 <!-- Stats -->
@@ -39,10 +41,10 @@ $pinnedNotes = count(array_filter($notes, fn($n) => $n['is_pinned']));
 
 <?php if (empty($notes)): ?>
     <div class="empty-state">
-        <div class="empty-state-icon">📝</div>
+        
         <h2>No Notes Yet</h2>
         <p>Start by creating your first note!</p>
-        <a href="create.php" class="btn btn-primary">Create Note</a>
+       
     </div>
 <?php else: ?>
     <div class="notes-grid">
@@ -51,7 +53,7 @@ $pinnedNotes = count(array_filter($notes, fn($n) => $n['is_pinned']));
                  style="background-color: <?= sanitize($note['color']) ?>">
 
                 <?php if ($note['is_pinned']): ?>
-                    <span class="pin-badge" title="Pinned">📌</span>
+                    <span class="pin-badge" title="Pinned">Pinned</span>
                 <?php endif; ?>
 
                 <div class="note-header">
@@ -74,14 +76,14 @@ $pinnedNotes = count(array_filter($notes, fn($n) => $n['is_pinned']));
                         <a href="index.php?pin=<?= $note['id'] ?>"
                            class="pin"
                            title="<?= $note['is_pinned'] ? 'Unpin' : 'Pin' ?>">
-                            <?= $note['is_pinned'] ? '📍' : '📌' ?>
+                            <?= $note['is_pinned'] ? 'Unpin' : 'Pin' ?>
                         </a>
-                        <a href="edit.php?id=<?= $note['id'] ?>" title="Edit">✏️</a>
-                        <a href="archive.php?archive=<?= $note['id'] ?>" title="Archive">📦</a>
+                        <a href="edit.php?id=<?= $note['id'] ?>" title="Edit">Edit</a>
+                        <a href="archive.php?archive=<?= $note['id'] ?>" title="Archive">Archive</a>
                         <a href="delete.php?id=<?= $note['id'] ?>"
                            class="delete"
                            title="Delete"
-                           onclick="return confirm('Are you sure you want to delete this note?')">🗑️</a>
+                           onclick="return confirm('Are you sure you want to delete this note?')">Delete</a>
                     </div>
                 </div>
             </div>

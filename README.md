@@ -4,6 +4,8 @@ A beginner-friendly notes application built with PHP and SQLite demonstrating fu
 
 ## Features
 
+- **User Authentication**: Register, Login, Logout with session-based auth
+- **User-Specific Notes**: Each user sees only their own notes
 - Create, Read, Update, Delete (CRUD) notes
 - Pin important notes to the top
 - Archive notes for later
@@ -11,6 +13,7 @@ A beginner-friendly notes application built with PHP and SQLite demonstrating fu
 - Color-coded notes
 - Categorize notes (Personal, Work, Ideas, Shopping, Important)
 - Responsive design
+- Secure password hashing with `password_hash()`
 
 ## Project Structure
 
@@ -21,7 +24,7 @@ day-45/
 ├── includes/
 │   ├── header.php        # HTML header, navigation, session start
 │   ├── footer.php        # HTML footer
-│   └── functions.php     # Helper functions (CRUD operations)
+│   └── functions.php     # Helper functions (CRUD & auth operations)
 ├── css/
 │   └── style.css         # Styling
 ├── data/
@@ -32,6 +35,9 @@ day-45/
 ├── delete.php            # Delete a note
 ├── search.php            # Search results page
 ├── archive.php           # View/manage archived notes
+├── register.php          # User registration page
+├── login.php             # User login page
+├── logout.php            # Logout handler
 ├── database.sql          # MySQL reference schema (for learning)
 └── README.md             # This file
 ```
@@ -565,22 +571,183 @@ if (!empty($query)) {
 
 ---
 
+## Step 11: User Authentication System
+
+### What You'll Learn
+- Session-based authentication
+- Secure password hashing
+- User registration and login
+- Protecting user data
+
+### Database Schema (Users Table):
+
+```sql
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Add user_id to notes table
+ALTER TABLE notes ADD COLUMN user_id INTEGER NULL REFERENCES users(id) ON DELETE CASCADE;
+```
+
+### Authentication Functions (includes/functions.php):
+
+```php
+<?php
+/**
+ * Register a new user
+ */
+function registerUser($pdo, $username, $email, $password) {
+    // ALWAYS hash passwords - never store plain text!
+    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+    $stmt = $pdo->prepare("
+        INSERT INTO users (username, email, password)
+        VALUES (?, ?, ?)
+    ");
+
+    return $stmt->execute([$username, $email, $hashedPassword]);
+}
+
+/**
+ * Authenticate user login
+ */
+function loginUser($pdo, $username, $password) {
+    // Allow login with username OR email
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ? OR email = ?");
+    $stmt->execute([$username, $username]);
+    $user = $stmt->fetch();
+
+    // Verify password against hash
+    if ($user && password_verify($password, $user['password'])) {
+        // Store user info in session
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['username'] = $user['username'];
+        $_SESSION['email'] = $user['email'];
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * Logout user - destroy session
+ */
+function logoutUser() {
+    unset($_SESSION['user_id']);
+    unset($_SESSION['username']);
+    unset($_SESSION['email']);
+    session_destroy();
+}
+
+/**
+ * Check if user is logged in
+ */
+function isLoggedIn() {
+    return isset($_SESSION['user_id']);
+}
+
+/**
+ * Require login - redirect if not authenticated
+ */
+function requireLogin() {
+    if (!isLoggedIn()) {
+        setFlashMessage('error', 'Please login to access this page.');
+        redirect('login.php');
+    }
+}
+```
+
+### Key Concepts:
+
+1. **`password_hash()`**: Creates secure bcrypt hash (never store plain passwords!)
+2. **`password_verify()`**: Safely compare password against hash
+3. **Session Variables**: Store user info after successful login
+4. **`session_destroy()`**: Clean logout by destroying session
+
+### Registration Flow (register.php):
+
+```php
+<?php
+// Validate input
+if (empty($username)) {
+    $errors['username'] = 'Username is required';
+} elseif (usernameExists($pdo, $username)) {
+    $errors['username'] = 'Username is already taken';
+}
+
+// Check password match
+if ($password !== $confirmPassword) {
+    $errors['confirm_password'] = 'Passwords do not match';
+}
+
+// Register if no errors
+if (empty($errors)) {
+    registerUser($pdo, $username, $email, $password);
+    loginUser($pdo, $username, $password);  // Auto-login
+    redirect('index.php');
+}
+```
+
+### Filtering Notes by User:
+
+```php
+<?php
+/**
+ * Get all notes for current user only
+ */
+function getAllNotes($pdo, $archived = false) {
+    $userId = $_SESSION['user_id'] ?? null;
+
+    $sql = "SELECT n.*, c.name as category_name, c.color as category_color
+            FROM notes n
+            LEFT JOIN categories c ON n.category_id = c.id
+            WHERE n.is_archived = :archived";
+
+    if ($userId) {
+        $sql .= " AND n.user_id = :user_id";
+    } else {
+        $sql .= " AND n.user_id IS NULL";
+    }
+
+    $sql .= " ORDER BY n.is_pinned DESC, n.updated_at DESC";
+
+    $stmt = $pdo->prepare($sql);
+    $params = ['archived' => $archived ? 1 : 0];
+    if ($userId) {
+        $params['user_id'] = $userId;
+    }
+    $stmt->execute($params);
+    return $stmt->fetchAll();
+}
+```
+
+---
+
 ## Security Best Practices Used
 
 1. **Prepared Statements**: Never concatenate user input into SQL
 2. **Input Sanitization**: `htmlspecialchars()` prevents XSS
 3. **Type Casting**: `(int)$id` ensures numeric IDs
-4. **CSRF Protection**: (Not implemented - add for production)
+4. **Password Hashing**: Using `password_hash()` with bcrypt
+5. **Session-Based Auth**: Secure user identification
+6. **CSRF Protection**: (Not implemented - add for production)
 
 ---
 
 ## Exercises to Practice
 
 1. **Add Categories Page**: Create CRUD for categories
-2. **Add User Authentication**: Login/register system
+2. ~~**Add User Authentication**: Login/register system~~ ✅ Implemented!
 3. **Add Tags**: Many-to-many relationship with notes
 4. **Export Notes**: Download notes as JSON or PDF
 5. **Add CSRF Tokens**: Protect forms from cross-site attacks
+6. **Password Reset**: Add forgot password functionality
+7. **User Profile**: Allow users to update their profile info
 
 ---
 

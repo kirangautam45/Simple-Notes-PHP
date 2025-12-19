@@ -25,11 +25,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // If no errors, insert into database
     if (empty($errors)) {
         try {
+            $userId = $_SESSION['user_id'] ?? null;
             $stmt = $pdo->prepare("
-                INSERT INTO notes (title, content, color, category_id)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO notes (title, content, color, category_id, user_id)
+                VALUES (?, ?, ?, ?, ?)
             ");
-            $stmt->execute([$title, $content, $color, $category_id ?: null]);
+            $stmt->execute([$title, $content, $color, $category_id ?: null, $userId]);
 
             setFlashMessage('success', 'Note created successfully!');
             redirect('index.php');

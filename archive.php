@@ -41,14 +41,11 @@ if (isset($_GET['delete'])) {
 $notes = getAllNotes($pdo, true);
 ?>
 
-<div class="page-header">
-    <h1>📦 Archived Notes</h1>
-    <a href="index.php" class="btn btn-secondary">Back to Notes</a>
-</div>
+
 
 <?php if (empty($notes)): ?>
     <div class="empty-state">
-        <div class="empty-state-icon">📦</div>
+    
         <h2>No Archived Notes</h2>
         <p>Notes you archive will appear here.</p>
         <a href="index.php" class="btn btn-primary">View All Notes</a>

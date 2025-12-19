@@ -2,12 +2,18 @@
 session_start();
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/functions.php';
+
+// Check if flash message exists for meta refresh
+$hasFlash = isset($_SESSION['flash']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <?php if ($hasFlash): ?>
+    <meta http-equiv="refresh" content="5">
+    <?php endif; ?>
     <title><?= isset($pageTitle) ? sanitize($pageTitle) . ' - ' : '' ?>Simple Notes App</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -24,6 +30,15 @@ require_once __DIR__ . '/functions.php';
                 <input type="text" name="q" placeholder="Search notes..." value="<?= isset($_GET['q']) ? sanitize($_GET['q']) : '' ?>">
                 <button type="submit">Search</button>
             </form>
+            <div class="auth-links">
+                <?php if (isLoggedIn()): ?>
+                    <span class="user-greeting">Hello, <?= sanitize($_SESSION['username']) ?></span>
+                    <a href="logout.php" class="btn btn-sm btn-logout">Logout</a>
+                <?php else: ?>
+                    <a href="login.php" class="btn btn-sm">Login</a>
+                    <a href="register.php" class="btn btn-sm btn-register">Register</a>
+                <?php endif; ?>
+            </div>
         </div>
     </nav>
 
