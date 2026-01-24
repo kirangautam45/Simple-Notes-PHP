@@ -18,7 +18,7 @@ A beginner-friendly notes application built with PHP and SQLite demonstrating fu
 ## Project Structure
 
 ```
-day-45/
+notesapp/
 ├── config/
 │   └── database.php      # Database connection & initialization
 ├── includes/
@@ -71,6 +71,7 @@ This guide teaches you how to build this notes app step by step. Each step intro
 ## Step 1: Project Setup
 
 ### What You'll Learn
+
 - Directory structure for PHP projects
 - Separating concerns (config, includes, pages)
 
@@ -82,7 +83,9 @@ cd notes-app
 ```
 
 ### Key Concept: Separation of Concerns
+
 Keep your code organized:
+
 - `config/` - Database and app configuration
 - `includes/` - Reusable PHP components
 - `css/` - Stylesheets
@@ -93,6 +96,7 @@ Keep your code organized:
 ## Step 2: Database Connection (config/database.php)
 
 ### What You'll Learn
+
 - PDO (PHP Data Objects) for database access
 - SQLite database basics
 - Try-catch error handling
@@ -143,6 +147,7 @@ try {
 ## Step 3: Create Database Tables
 
 ### What You'll Learn
+
 - SQL CREATE TABLE syntax
 - Data types (INTEGER, VARCHAR, TEXT, BOOLEAN)
 - Primary keys and auto-increment
@@ -187,6 +192,7 @@ CREATE TABLE IF NOT EXISTS categories (
 ## Step 4: Helper Functions (includes/functions.php)
 
 ### What You'll Learn
+
 - Creating reusable functions
 - Prepared statements for secure queries
 - Input sanitization
@@ -263,6 +269,7 @@ function searchNotes($pdo, $query) {
 ## Step 5: Header & Footer Templates (includes/header.php, footer.php)
 
 ### What You'll Learn
+
 - Session management
 - Reusable templates with includes
 - Flash messages for user feedback
@@ -312,6 +319,7 @@ require_once __DIR__ . '/functions.php';
 ## Step 6: Create Note (create.php) - The "C" in CRUD
 
 ### What You'll Learn
+
 - HTML forms with POST method
 - Form validation
 - Inserting data into database
@@ -393,6 +401,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ## Step 7: Read Notes (index.php) - The "R" in CRUD
 
 ### What You'll Learn
+
 - Fetching data from database
 - Looping through results in HTML
 - Conditional rendering
@@ -439,6 +448,7 @@ $notes = getAllNotes($pdo, false);
 ## Step 8: Update Note (edit.php) - The "U" in CRUD
 
 ### What You'll Learn
+
 - Fetching single record by ID
 - Pre-filling form with existing data
 - UPDATE query
@@ -497,6 +507,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ## Step 9: Delete Note (delete.php) - The "D" in CRUD
 
 ### What You'll Learn
+
 - DELETE query
 - Confirmation before destructive actions
 
@@ -533,6 +544,7 @@ redirect('index.php');
 3. **No Template**: This page only processes, then redirects
 
 ### Important Security Note:
+
 In production, use POST requests for deletions, not GET. GET requests can be triggered by bots or prefetching.
 
 ---
@@ -540,6 +552,7 @@ In production, use POST requests for deletions, not GET. GET requests can be tri
 ## Step 10: Search Functionality (search.php)
 
 ### What You'll Learn
+
 - GET parameters for search queries
 - SQL LIKE for pattern matching
 
@@ -574,6 +587,7 @@ if (!empty($query)) {
 ## Step 11: User Authentication System
 
 ### What You'll Learn
+
 - Session-based authentication
 - Secure password hashing
 - User registration and login

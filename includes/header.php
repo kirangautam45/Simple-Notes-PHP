@@ -21,15 +21,19 @@ $hasFlash = isset($_SESSION['flash']);
     <nav class="navbar">
         <div class="container">
             <a href="index.php" class="logo">Simple Notes</a>
+            <!-- $_SERVER['PHP_SELF'] - Returns the full path of the current script (e.g., /notesapp/login.php) -->
+            <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
+            <?php if ($currentPage !== 'login.php' && $currentPage !== 'register.php'): ?>
             <div class="nav-links">
-                <a href="index.php" class="<?= basename($_SERVER['PHP_SELF']) === 'index.php' ? 'active' : '' ?>">All Notes</a>
-                <a href="create.php" class="<?= basename($_SERVER['PHP_SELF']) === 'create.php' ? 'active' : '' ?>">+ New Note</a>
-                <a href="archive.php" class="<?= basename($_SERVER['PHP_SELF']) === 'archive.php' ? 'active' : '' ?>">Archive</a>
+                <a href="index.php" class="<?= $currentPage === 'index.php' ? 'active' : '' ?>">All Notes</a>
+                <a href="create.php" class="<?= $currentPage === 'create.php' ? 'active' : '' ?>">+ New Note</a>
+                <a href="archive.php" class="<?= $currentPage === 'archive.php' ? 'active' : '' ?>">Archive</a>
             </div>
             <form action="search.php" method="GET" class="search-form">
                 <input type="text" name="q" placeholder="Search notes..." value="<?= isset($_GET['q']) ? sanitize($_GET['q']) : '' ?>">
                 <button type="submit">Search</button>
             </form>
+            <?php endif; ?>
             <div class="auth-links">
                 <?php if (isLoggedIn()): ?>
                     <span class="user-greeting">Hello, <?= sanitize($_SESSION['username']) ?></span>

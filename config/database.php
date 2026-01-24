@@ -28,6 +28,9 @@ try {
     // Enable foreign keys for SQLite
     $pdo->exec("PRAGMA foreign_keys = ON");
 
+    // Debug: Show PDO object info
+    var_dump($pdo);
+
     // Initialize database if tables don't exist
     initializeDatabase($pdo);
 
@@ -105,75 +108,4 @@ function initializeDatabase($pdo) {
     $pdo->exec("CREATE INDEX IF NOT EXISTS idx_user_id ON notes(user_id)");
 
   
-    // Insert sample categories
-    $pdo->exec("
-        INSERT INTO categories (name, color) VALUES
-        ('Personal', '#e91e63'),
-        ('Work', '#2196f3'),
-        ('Ideas', '#ff9800'),
-        ('Shopping', '#4caf50'),
-        ('Important', '#f44336')
-    ");
-
-    // Insert sample notes
-    $pdo->exec("
-        INSERT INTO notes (title, content, color, is_pinned, category_id) VALUES
-        ('Welcome to Notes App!', 'This is your first note. You can:
-- Edit this note
-- Create new notes
-- Pin important notes
-- Archive old notes
-- Search your notes
-
-Enjoy organizing your thoughts!', '#fff9c4', 1, NULL),
-
-        ('Shopping List', '- Milk
-- Eggs
-- Bread
-- Butter
-- Cheese
-- Fruits
-- Vegetables', '#c8e6c9', 0, 4),
-
-        ('Project Ideas', '1. Build a todo app with React
-2. Create a blog with PHP
-3. Make a portfolio website
-4. Learn a new programming language
-5. Contribute to open source', '#bbdefb', 0, 3),
-
-        ('Meeting Notes - Monday', 'Topics discussed:
-- Quarterly goals review
-- Team performance
-- Next sprint planning
-- Budget allocation
-
-Action items:
-- Follow up with marketing
-- Prepare presentation
-- Send meeting summary', '#f8bbd0', 0, 2),
-
-        ('Personal Goals 2024', '- Learn a new skill
-- Read 12 books
-- Exercise regularly
-- Save more money
-- Travel to a new place
-- Spend more time with family', '#e1bee7', 0, 1),
-
-        ('Quick Tip', 'Use this app to organize your thoughts and ideas!', '#b2ebf2', 1, NULL),
-
-        ('Recipe: Pasta', 'Ingredients:
-- 200g pasta
-- 2 cloves garlic
-- Olive oil
-- Parmesan cheese
-- Salt & pepper
-- Fresh basil
-
-Steps:
-1. Boil pasta
-2. Sauté garlic in olive oil
-3. Mix pasta with garlic oil
-4. Add cheese and seasoning
-5. Garnish with basil', '#ffccbc', 0, 1)
-    ");
 }
