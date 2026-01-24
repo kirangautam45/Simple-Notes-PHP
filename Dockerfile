@@ -1,12 +1,40 @@
-# Production Dockerfile for PHP Notes App
-FROM php:8.2-apache
+# Multi-stage Production Dockerfile for PHP Notes App
 
-# Install system dependencies and PHP extensions
-RUN apt-get update && apt-get install -y \
-    libsqlite3-dev \
+# ============================================
+# Stage 1: Builder - Prepare application files
+# ============================================
+FROM php:8.2-cli-alpine AS builder
+
+WORKDIR /app
+
+# Copy application source
+COPY . .
+
+# Remove unnecessary files for production
+RUN rm -rf \
+    .git \
+    .gitignore \
+    .dockerignore \
+    Dockerfile \
+    docker-compose*.yml \
+    *.md \
+    tests \
+    .env.example \
+    .vscode \
+    .idea
+
+# ============================================
+# Stage 2: Production - Final runtime image
+# ============================================
+FROM php:8.2-apache AS production
+
+# Install only runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libsqlite3-0 \
+    curl \
     && docker-php-ext-install pdo pdo_sqlite \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Enable Apache modules
 RUN a2enmod rewrite headers
@@ -17,10 +45,10 @@ RUN sed -i 's/80/${PORT}/g' /etc/apache2/sites-available/000-default.conf /etc/a
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy application files
-COPY . .
+# Copy application from builder stage
+COPY --from=builder /app .
 
-# Create data directory for SQLite database and set permissions
+# Create data directory for SQLite and set permissions
 RUN mkdir -p /var/www/html/data \
     && chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html \
@@ -29,17 +57,26 @@ RUN mkdir -p /var/www/html/data \
 # Configure PHP for production
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
-# Set recommended PHP settings
-RUN echo "session.cookie_httponly = 1" >> "$PHP_INI_DIR/php.ini" \
-    && echo "session.cookie_secure = 1" >> "$PHP_INI_DIR/php.ini" \
-    && echo "session.use_strict_mode = 1" >> "$PHP_INI_DIR/php.ini" \
-    && echo "expose_php = Off" >> "$PHP_INI_DIR/php.ini"
+# Security hardening
+RUN { \
+    echo "session.cookie_httponly = 1"; \
+    echo "session.cookie_secure = 1"; \
+    echo "session.use_strict_mode = 1"; \
+    echo "expose_php = Off"; \
+    echo "display_errors = Off"; \
+    echo "log_errors = On"; \
+    echo "error_log = /var/log/apache2/php_errors.log"; \
+} >> "$PHP_INI_DIR/php.ini"
 
-# Set environment variable for port (Render provides this)
+# Set environment variable for port
 ENV PORT=10000
 
 # Expose the port
 EXPOSE ${PORT}
 
-# Start Apache in foreground
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:${PORT}/ || exit 1
+
+# Start Apache (runs as root, drops to www-data for worker processes)
 CMD ["apache2-foreground"]
