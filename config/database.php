@@ -28,9 +28,6 @@ try {
     // Enable foreign keys for SQLite
     $pdo->exec("PRAGMA foreign_keys = ON");
 
-    // Debug: Show PDO object info
-    var_dump($pdo);
-
     // Initialize database if tables don't exist
     initializeDatabase($pdo);
 
