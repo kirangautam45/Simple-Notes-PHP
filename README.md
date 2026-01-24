@@ -2,6 +2,22 @@
 
 A beginner-friendly notes application built with PHP and SQLite demonstrating fundamental web development concepts.
 
+## Live Demo
+
+🔗 **[https://simple-notes-php.onrender.com](https://simple-notes-php.onrender.com)**
+
+## Tech Stack
+
+| Technology | Purpose |
+|------------|---------|
+| **PHP 8.2** | Backend language |
+| **SQLite** | Database (file-based, no server needed) |
+| **PDO** | Database abstraction layer |
+| **HTML5/CSS3** | Frontend markup & styling |
+| **CSS Variables** | Dark/Light theme support |
+| **Docker** | Containerization for deployment |
+| **Apache** | Web server (in Docker) |
+
 ## Features
 
 - **User Authentication**: Register, Login, Logout with session-based auth
@@ -12,6 +28,7 @@ A beginner-friendly notes application built with PHP and SQLite demonstrating fu
 - Search notes by title or content
 - Color-coded notes
 - Categorize notes (Personal, Work, Ideas, Shopping, Important)
+- Dark/Light theme toggle
 - Responsive design
 - Secure password hashing with `password_hash()`
 
@@ -20,13 +37,16 @@ A beginner-friendly notes application built with PHP and SQLite demonstrating fu
 ```
 notesapp/
 ├── config/
-│   └── database.php      # Database connection & initialization
+│   └── database.php      # Database connection & auto-initialization
 ├── includes/
-│   ├── header.php        # HTML header, navigation, session start
+│   ├── header.php        # HTML header, navigation, session, theme toggle
 │   ├── footer.php        # HTML footer
 │   └── functions.php     # Helper functions (CRUD & auth operations)
 ├── css/
-│   └── style.css         # Styling
+│   └── style.css         # Styling (with dark mode support)
+├── images/
+│   ├── login-illustration.svg
+│   └── register-illustration.svg
 ├── data/
 │   └── notes.db          # SQLite database (auto-created)
 ├── index.php             # Home page - List all notes
@@ -38,7 +58,8 @@ notesapp/
 ├── register.php          # User registration page
 ├── login.php             # User login page
 ├── logout.php            # Logout handler
-├── database.sql          # MySQL reference schema (for learning)
+├── Dockerfile            # Docker configuration for deployment
+├── render.yaml           # Render.com deployment config
 └── README.md             # This file
 ```
 
@@ -48,7 +69,7 @@ notesapp/
 - SQLite3 extension (usually included with PHP)
 - Web server (Apache, Nginx, or PHP built-in server)
 
-## Installation
+## Installation (Local Development)
 
 1. Clone or download this project
 2. Navigate to the project directory
@@ -58,7 +79,85 @@ notesapp/
    ```
 4. Open `http://localhost:8000` in your browser
 
-The database will be automatically created with sample data on first run.
+The database will be automatically created with sample categories on first run.
+
+## Deployment (Docker/Render.com)
+
+### Using Docker locally:
+```bash
+docker build -t notesapp .
+docker run -p 8000:10000 -e PORT=10000 notesapp
+```
+
+### Deploy to Render.com:
+1. Push code to GitHub
+2. Connect repo to Render.com
+3. It will auto-detect the Dockerfile and deploy
+
+## What to Code First (Recommended Order)
+
+If you're building this from scratch, follow this order:
+
+```
+1. config/database.php     → Database connection first
+2. includes/functions.php  → Helper functions (sanitize, redirect, flash messages)
+3. includes/header.php     → Common HTML header & navigation
+4. includes/footer.php     → Common HTML footer
+5. css/style.css          → Basic styling
+6. index.php              → Read notes (the "R" in CRUD)
+7. create.php             → Create notes (the "C" in CRUD)
+8. edit.php               → Update notes (the "U" in CRUD)
+9. delete.php             → Delete notes (the "D" in CRUD)
+10. search.php            → Search functionality
+11. archive.php           → Archive feature
+12. register.php          → User registration
+13. login.php             → User login
+14. logout.php            → Logout handler
+```
+
+## Troubleshooting
+
+### Categories not showing in dropdown
+**Problem**: Category dropdown is empty when creating/editing notes.
+
+**Solution**: The database needs to be reinitialized. Delete the `data/notes.db` file and refresh the page. Categories will be auto-created.
+
+```bash
+rm data/notes.db
+```
+
+### Database connection failed
+**Problem**: Error "Database connection failed" on page load.
+
+**Solution**:
+1. Ensure `data/` directory exists and is writable
+2. Check PHP has SQLite extension: `php -m | grep sqlite`
+3. On Linux/Mac: `chmod 775 data/`
+
+### Session/Login issues
+**Problem**: Can't stay logged in or session errors.
+
+**Solution**:
+1. Ensure `session_start()` is called before any output
+2. Check PHP session directory is writable
+3. Clear browser cookies and try again
+
+### Docker container won't start
+**Problem**: Container exits immediately or port issues.
+
+**Solution**:
+```bash
+# Check logs
+docker logs <container_id>
+
+# Ensure port is available
+docker run -p 8080:10000 -e PORT=10000 notesapp
+```
+
+### Notes not showing after login
+**Problem**: User logs in but sees no notes.
+
+**Solution**: Each user only sees their own notes. Notes created before login (with `user_id = NULL`) won't appear. Create new notes after logging in.
 
 ---
 

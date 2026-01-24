@@ -3,11 +3,31 @@ session_start();
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/functions.php';
 
+// Handle theme toggle
+if (isset($_GET['toggle_theme'])) {
+    $currentTheme = isset($_COOKIE['theme']) ? $_COOKIE['theme'] : 'light';
+    $newTheme = $currentTheme === 'dark' ? 'light' : 'dark';
+    setcookie('theme', $newTheme, time() + (365 * 24 * 60 * 60), '/'); // 1 year expiry
+
+    // Redirect back to the same page without the toggle_theme parameter
+    $redirectUrl = strtok($_SERVER['REQUEST_URI'], '?');
+    $queryParams = $_GET;
+    unset($queryParams['toggle_theme']);
+    if (!empty($queryParams)) {
+        $redirectUrl .= '?' . http_build_query($queryParams);
+    }
+    header('Location: ' . $redirectUrl);
+    exit;
+}
+
+// Get current theme from cookie
+$theme = isset($_COOKIE['theme']) ? $_COOKIE['theme'] : 'light';
+
 // Check if flash message exists for meta refresh
 $hasFlash = isset($_SESSION['flash']);
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="<?= htmlspecialchars($theme) ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,7 +40,13 @@ $hasFlash = isset($_SESSION['flash']);
 <body>
     <nav class="navbar">
         <div class="container">
-            <a href="index.php" class="logo">Simple Notes</a>
+            <div class="logo-group">
+                <a href="index.php" class="logo">Simple Notes</a>
+                <a href="?toggle_theme=1" class="theme-toggle" title="Toggle theme">
+                    <span class="icon-sun">&#9728;</span>
+                    <span class="icon-moon">&#9790;</span>
+                </a>
+            </div>
             <!-- $_SERVER['PHP_SELF'] - Returns the full path of the current script (e.g., /notesapp/login.php) -->
             <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
             <?php if ($currentPage !== 'login.php' && $currentPage !== 'register.php'): ?>

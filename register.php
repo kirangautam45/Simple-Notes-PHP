@@ -64,74 +64,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 <div class="auth-container">
-    <div class="auth-card">
-        <div class="auth-header">
-            <h1>Create Account</h1>
-            <p>Join us and start organizing your notes</p>
+    <div class="auth-card auth-card-wide">
+        <!-- Left side: Image -->
+        <div class="auth-image">
+            <img src="images/register-illustration.svg" alt="Register illustration">
+            <h2>Organize Your Thoughts</h2>
+            <p>Keep all your notes in one place</p>
         </div>
 
-        <?php if (isset($errors['database'])): ?>
-            <div class="alert alert-error"><?= $errors['database'] ?></div>
-        <?php endif; ?>
-
-        <form method="POST" action="" class="auth-form">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text"
-                       id="username"
-                       name="username"
-                       value="<?= sanitize($username) ?>"
-                       placeholder="Choose a username"
-                       maxlength="50"
-                       required>
-                <?php if (isset($errors['username'])): ?>
-                    <span class="error"><?= $errors['username'] ?></span>
-                <?php endif; ?>
+        <!-- Right side: Form -->
+        <div class="auth-content">
+            <div class="auth-header">
+                <h1>Create Account</h1>
+                <p>Join us and start organizing your notes</p>
             </div>
 
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email"
-                       id="email"
-                       name="email"
-                       value="<?= sanitize($email) ?>"
-                       placeholder="Enter your email"
-                       required>
-                <?php if (isset($errors['email'])): ?>
-                    <span class="error"><?= $errors['email'] ?></span>
-                <?php endif; ?>
+            <?php if (isset($errors['database'])): ?>
+                <div class="alert alert-error"><?= $errors['database'] ?></div>
+            <?php endif; ?>
+
+            <form method="POST" action="" class="auth-form">
+                <div class="form-group inline">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" value="<?= sanitize($username) ?>" placeholder="Username" maxlength="50" required>
+                    <?php if (isset($errors['username'])): ?>
+                        <span class="error"><?= $errors['username'] ?></span>
+                    <?php endif; ?>
+                </div>
+
+                <div class="form-group inline">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" value="<?= sanitize($email) ?>" placeholder="Email" required>
+                    <?php if (isset($errors['email'])): ?>
+                        <span class="error"><?= $errors['email'] ?></span>
+                    <?php endif; ?>
+                </div>
+
+                <div class="form-group inline">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Password" minlength="6" required>
+                    <?php if (isset($errors['password'])): ?>
+                        <span class="error"><?= $errors['password'] ?></span>
+                    <?php endif; ?>
+                </div>
+
+                <div class="form-group inline">
+                    <label for="confirm_password">Confirm</label>
+                    <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm" required>
+                    <?php if (isset($errors['confirm_password'])): ?>
+                        <span class="error"><?= $errors['confirm_password'] ?></span>
+                    <?php endif; ?>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">Get Started</button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Already have an account? <a href="login.php">Login here</a></p>
             </div>
-
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password"
-                       id="password"
-                       name="password"
-                       placeholder="Create a password"
-                       minlength="6"
-                       required>
-                <?php if (isset($errors['password'])): ?>
-                    <span class="error"><?= $errors['password'] ?></span>
-                <?php endif; ?>
-            </div>
-
-            <div class="form-group">
-                <label for="confirm_password">Confirm Password</label>
-                <input type="password"
-                       id="confirm_password"
-                       name="confirm_password"
-                       placeholder="Confirm your password"
-                       required>
-                <?php if (isset($errors['confirm_password'])): ?>
-                    <span class="error"><?= $errors['confirm_password'] ?></span>
-                <?php endif; ?>
-            </div>
-
-            <button type="submit" class="btn btn-primary btn-block">Register</button>
-        </form>
-
-        <div class="auth-footer">
-            <p>Already have an account? <a href="login.php">Login here</a></p>
         </div>
     </div>
 </div>

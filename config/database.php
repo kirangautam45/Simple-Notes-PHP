@@ -50,7 +50,30 @@ function initializeDatabase($pdo) {
         )
     ");
 
-    // Check if tables exist
+    // Create Categories Table (always ensure it exists)
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS categories (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name VARCHAR(100) NOT NULL,
+            color VARCHAR(7) DEFAULT '#667eea',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ");
+
+    // Insert default categories if table is empty
+    $catCount = $pdo->query("SELECT COUNT(*) FROM categories")->fetchColumn();
+    if ($catCount == 0) {
+        $pdo->exec("
+            INSERT INTO categories (name, color) VALUES
+            ('Personal', '#e91e63'),
+            ('Work', '#2196f3'),
+            ('Ideas', '#ff9800'),
+            ('Shopping', '#4caf50'),
+            ('Important', '#f44336')
+        ");
+    }
+
+    // Check if notes table exists
     $result = $pdo->query("SELECT name FROM sqlite_master WHERE type='table' AND name='notes'");
     if ($result->fetch()) {
         // Add user_id column if it doesn't exist
@@ -66,19 +89,8 @@ function initializeDatabase($pdo) {
             $pdo->exec("ALTER TABLE notes ADD COLUMN user_id INTEGER NULL REFERENCES users(id) ON DELETE CASCADE");
             $pdo->exec("CREATE INDEX IF NOT EXISTS idx_user_id ON notes(user_id)");
         }
-        return; // Tables already exist
+        return; // Notes table already exists
     }
-
-
-    // Create Categories Table
-    $pdo->exec("
-        CREATE TABLE IF NOT EXISTS categories (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name VARCHAR(100) NOT NULL,
-            color VARCHAR(7) DEFAULT '#667eea',
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-    ");
 
     // Create Notes Table
     $pdo->exec("
@@ -103,6 +115,4 @@ function initializeDatabase($pdo) {
     $pdo->exec("CREATE INDEX IF NOT EXISTS idx_is_pinned ON notes(is_pinned)");
     $pdo->exec("CREATE INDEX IF NOT EXISTS idx_updated_at ON notes(updated_at)");
     $pdo->exec("CREATE INDEX IF NOT EXISTS idx_user_id ON notes(user_id)");
-
-  
 }
