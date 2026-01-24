@@ -28,11 +28,13 @@ RUN rm -rf \
 # ============================================
 FROM php:8.2-apache AS production
 
-# Install only runtime dependencies
+# Install dependencies and build PHP extensions
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libsqlite3-0 \
+    libsqlite3-dev \
     curl \
     && docker-php-ext-install pdo pdo_sqlite \
+    && apt-get purge -y libsqlite3-dev \
+    && apt-get autoremove -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
