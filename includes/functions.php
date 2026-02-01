@@ -120,7 +120,7 @@ function searchNotes($pdo, $query) {
             FROM notes n
             LEFT JOIN categories c ON n.category_id = c.id
             WHERE n.is_archived = 0
-            AND (n.title LIKE :query OR n.content LIKE :query)";
+            AND (n.title ILIKE :query OR n.content ILIKE :query)";
 
     if ($userId) {
         $sql .= " AND n.user_id = :user_id";
