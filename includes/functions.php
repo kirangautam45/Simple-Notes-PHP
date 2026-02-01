@@ -227,6 +227,7 @@ function loginUser($pdo, $username, $password) {
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['username'] = $user['username'];
         $_SESSION['email'] = $user['email'];
+        $_SESSION['profile_image'] = $user['profile_image'] ?? null;
         return true;
     }
 
@@ -240,6 +241,7 @@ function logoutUser() {
     unset($_SESSION['user_id']);
     unset($_SESSION['username']);
     unset($_SESSION['email']);
+    unset($_SESSION['profile_image']);
     session_destroy();
 }
 
@@ -258,10 +260,33 @@ function getCurrentUser() {
         return [
             'id' => $_SESSION['user_id'],
             'username' => $_SESSION['username'],
-            'email' => $_SESSION['email']
+            'email' => $_SESSION['email'],
+            'profile_image' => $_SESSION['profile_image'] ?? null
         ];
     }
     return null;
+}
+
+/**
+ * Update user profile
+ */
+function updateUser($pdo, $userId, $fullName, $bio, $profileImage = null) {
+    $sql = "UPDATE users SET full_name = :full_name, bio = :bio";
+    $params = [
+        'full_name' => $fullName,
+        'bio' => $bio,
+        'user_id' => $userId
+    ];
+
+    if ($profileImage) {
+        $sql .= ", profile_image = :profile_image";
+        $params['profile_image'] = $profileImage;
+    }
+
+    $sql .= " WHERE id = :user_id";
+
+    $stmt = $pdo->prepare($sql);
+    return $stmt->execute($params);
 }
 
 /**
