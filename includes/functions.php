@@ -383,9 +383,10 @@ function loginUserWithToken($pdo): void {
 
     if ($user) {
         // Restore session (same as loginUser)
-        $_SESSION['user_id']  = $user['id'];
-        $_SESSION['username'] = $user['username'];
-        $_SESSION['email']    = $user['email'];
+        $_SESSION['user_id']       = $user['id'];
+        $_SESSION['username']      = $user['username'];
+        $_SESSION['email']         = $user['email'];
+        $_SESSION['profile_image'] = $user['profile_image'] ?? null;
 
         // Rotate token on each use (prevents token reuse if cookie is stolen)
         setRememberMeToken($pdo, $user['id']);

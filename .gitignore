@@ -17,6 +17,7 @@ Thumbs.db
 # PHP logs and temp files
 *.log
 error_log
+.env
 
 # Composer (if used later)
 /vendor/
