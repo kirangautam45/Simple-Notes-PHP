@@ -10,7 +10,7 @@ WORKDIR /app
 # Copy application source
 COPY . .
 
-# Remove unnecessary files for production
+# Remove unnecessary files for production (keep app code only)
 RUN rm -rf \
     .git \
     .gitignore \
@@ -19,7 +19,10 @@ RUN rm -rf \
     docker-compose*.yml \
     *.md \
     tests \
+    .env \
     .env.example \
+    test_db.php \
+    render.yaml \
     .vscode \
     .idea
 
@@ -33,7 +36,7 @@ FROM php:8.2-apache AS production
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     curl \
-    && docker-php-ext-install pdo pdo_pgsql \
+    && docker-php-ext-install pdo pdo_pgsql opcache \
     && apt-get purge -y libpq-dev \
     && apt-get autoremove -y \
     && apt-get clean \
@@ -58,7 +61,7 @@ RUN chown -R www-data:www-data /var/www/html \
 # Configure PHP for production
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
-# Security hardening
+# Security hardening + opcache for performance
 RUN { \
     echo "session.cookie_httponly = 1"; \
     echo "session.cookie_secure = 1"; \
@@ -67,6 +70,12 @@ RUN { \
     echo "display_errors = Off"; \
     echo "log_errors = On"; \
     echo "error_log = /var/log/apache2/php_errors.log"; \
+    echo "opcache.enable = 1"; \
+    echo "opcache.enable_cli = 0"; \
+    echo "opcache.validate_timestamps = 0"; \
+    echo "opcache.max_accelerated_files = 10000"; \
+    echo "opcache.memory_consumption = 128"; \
+    echo "opcache.interned_strings_buffer = 8"; \
 } >> "$PHP_INI_DIR/php.ini"
 
 # Set environment variable for port
