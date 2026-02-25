@@ -273,3 +273,34 @@ function requireLogin() {
         redirect('login.php');
     }
 }
+
+// ==========================================
+// Note Form Helpers
+// ==========================================
+
+/**
+ * Validate and sanitize note form input.
+ *
+ * Usage:
+ *   $result = validateNoteInput($_POST);
+ *   $errors = $result['errors'];   // array of field => message
+ *   $data   = $result['data'];     // clean, ready-to-use values
+ */
+function validateNoteInput(array $post): array {
+    $data = [
+        'title'       => trim($post['title']       ?? ''),
+        'content'     => trim($post['content']     ?? ''),
+        'color'       => $post['color']             ?? '#ffffff',
+        'category_id' => $post['category_id'] ?: null,
+    ];
+
+    $errors = [];
+
+    if (empty($data['title'])) {
+        $errors['title'] = 'Title is required';
+    } elseif (strlen($data['title']) > 255) {
+        $errors['title'] = 'Title must be less than 255 characters';
+    }
+
+    return ['errors' => $errors, 'data' => $data];
+}

@@ -78,9 +78,9 @@ $pinnedNotes = count(array_filter($notes, fn($n) => $n['is_pinned']));
                            title="<?= $note['is_pinned'] ? 'Unpin' : 'Pin' ?>">
                             <?= $note['is_pinned'] ? 'Unpin' : 'Pin' ?>
                         </a>
-                        <a href="edit.php?id=<?= $note['id'] ?>" title="Edit">Edit</a>
+                        <a href="note.php?action=edit&id=<?= $note['id'] ?>" title="Edit">Edit</a>
                         <a href="archive.php?archive=<?= $note['id'] ?>" title="Archive">Archive</a>
-                        <a href="delete.php?id=<?= $note['id'] ?>"
+                        <a href="note.php?action=delete&id=<?= $note['id'] ?>"
                            class="delete"
                            title="Delete"
                            onclick="return confirm('Are you sure you want to delete this note?')">Delete</a>

@@ -52,7 +52,7 @@ $hasFlash = isset($_SESSION['flash']);
             <?php if ($currentPage !== 'login.php' && $currentPage !== 'register.php'): ?>
             <div class="nav-links">
                 <a href="index.php" class="<?= $currentPage === 'index.php' ? 'active' : '' ?>">All Notes</a>
-                <a href="create.php" class="<?= $currentPage === 'create.php' ? 'active' : '' ?>">+ New Note</a>
+                <a href="note.php?action=create" class="<?= $currentPage === 'note.php' ? 'active' : '' ?>">+ New Note</a>
                 <a href="archive.php" class="<?= $currentPage === 'archive.php' ? 'active' : '' ?>">Archive</a>
             </div>
             <form action="search.php" method="GET" class="search-form">
