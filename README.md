@@ -830,3 +830,46 @@ LIMIT 5;
 ---
 
 Happy Coding!
+
+---
+
+## 📄 Putting This Project on Your Resume
+
+If you built this project yourself, here's a ready-to-use **resume entry** you can copy and adapt:
+
+---
+
+### Project Entry (copy & paste)
+
+**Simple Notes App** | PHP · PostgreSQL · PDO · HTML/CSS
+*[Live Demo](https://simple-notes-php.onrender.com) · [GitHub](#)*
+
+- Built a full-stack CRUD web application for managing personal notes with user authentication
+- Implemented session-based login/register system with secure `password_hash()` and a **Remember Me** feature using HTTP-only cookies and rotating tokens
+- Designed a **Front Controller** architecture (`note.php`) to handle Create, Edit, and Delete in a single reusable file, reducing code duplication by ~60%
+- Created reusable PHP partials and a shared validation helper (`validateNoteInput()`) following the **DRY principle**
+- Integrated **PostgreSQL** via PDO with prepared statements to prevent SQL injection
+- Added dark/light theme toggle, note pinning, archiving, full-text search, and colour-coding features
+- Deployed using **Docker** on Render.com
+
+---
+
+### Tech Stack (for Skills section)
+
+| Category | Technologies |
+|---|---|
+| **Language** | PHP 8.2 |
+| **Database** | PostgreSQL (Supabase) |
+| **Data Access** | PDO, Prepared Statements |
+| **Frontend** | HTML5, CSS3, CSS Variables |
+| **Auth** | Session-based auth, bcrypt hashing, Remember Me tokens |
+| **Architecture** | Front Controller pattern, MVC-inspired partials |
+| **DevOps** | Docker, Render.com |
+| **Security** | XSS prevention (`htmlspecialchars`), SQL injection prevention, HttpOnly cookies |
+
+---
+
+> [!TIP]
+> Tailor the bullet points to match the job description you're applying for.
+> If the role is backend-focused, emphasise PDO, security, and architecture.
+> If it's a junior/full-stack role, highlight the complete end-to-end build.

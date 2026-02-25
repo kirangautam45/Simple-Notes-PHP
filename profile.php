@@ -66,7 +66,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($error)) {
         if (updateUser($pdo, $user['id'], $fullName, $bio, $profileImage)) {
             $message = "Profile updated successfully!";
-            // Update session if needed (though we fetch from DB usually)
+
+            // ✅ Refresh session so the header avatar updates immediately
+            $_SESSION['profile_image'] = $profileImage;
             
             // Refresh local data
             $stmt->execute([$user['id']]);
