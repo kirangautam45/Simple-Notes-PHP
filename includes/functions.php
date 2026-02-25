@@ -298,3 +298,119 @@ function requireLogin() {
         redirect('login.php');
     }
 }
+
+// ==========================================
+// Note Form Helpers
+// ==========================================
+
+/**
+ * Validate and sanitize note form input.
+ *
+ * Usage:
+ *   $result = validateNoteInput($_POST);
+ *   $errors = $result['errors'];   // array of field => message
+ *   $data   = $result['data'];     // clean, ready-to-use values
+ */
+function validateNoteInput(array $post): array {
+    $data = [
+        'title'       => trim($post['title']       ?? ''),
+        'content'     => trim($post['content']     ?? ''),
+        'color'       => $post['color']             ?? '#ffffff',
+        'category_id' => $post['category_id'] ?: null,
+    ];
+
+    $errors = [];
+
+    if (empty($data['title'])) {
+        $errors['title'] = 'Title is required';
+    } elseif (strlen($data['title']) > 255) {
+        $errors['title'] = 'Title must be less than 255 characters';
+    }
+
+    return ['errors' => $errors, 'data' => $data];
+}
+
+// ==========================================
+// Remember Me Helpers
+// ==========================================
+
+define('REMEMBER_ME_COOKIE', 'remember_me');
+define('REMEMBER_ME_DAYS',   30);
+
+/**
+ * Generate a secure token, store it in DB, and set a cookie.
+ * Call this after a successful login when "Remember Me" is checked.
+ */
+function setRememberMeToken($pdo, int $userId): void {
+    $token  = bin2hex(random_bytes(32));   // 64-char cryptographically secure token
+    $expiry = date('Y-m-d H:i:s', strtotime('+' . REMEMBER_ME_DAYS . ' days'));
+
+    $stmt = $pdo->prepare("UPDATE users SET remember_token = ? WHERE id = ?");
+    $stmt->execute([$token, $userId]);
+
+    // HttpOnly + SameSite=Lax prevents JavaScript access and CSRF
+    setcookie(
+        REMEMBER_ME_COOKIE,
+        $token,
+        [
+            'expires'  => time() + (REMEMBER_ME_DAYS * 24 * 60 * 60),
+            'path'     => '/',
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]
+    );
+}
+
+/**
+ * Check for a remember-me cookie and, if valid, restore the session.
+ * Call this early on every page (before isLoggedIn() checks).
+ */
+function loginUserWithToken($pdo): void {
+    // Already logged in — nothing to do
+    if (isset($_SESSION['user_id'])) {
+        return;
+    }
+
+    $token = $_COOKIE[REMEMBER_ME_COOKIE] ?? '';
+    if (empty($token)) {
+        return;
+    }
+
+    // Look up user by token
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE remember_token = ?");
+    $stmt->execute([$token]);
+    $user = $stmt->fetch();
+
+    if ($user) {
+        // Restore session (same as loginUser)
+        $_SESSION['user_id']  = $user['id'];
+        $_SESSION['username'] = $user['username'];
+        $_SESSION['email']    = $user['email'];
+
+        // Rotate token on each use (prevents token reuse if cookie is stolen)
+        setRememberMeToken($pdo, $user['id']);
+    } else {
+        // Invalid/expired token — clear the cookie
+        clearRememberMeToken($pdo);
+    }
+}
+
+/**
+ * Clear the remember-me token from DB and delete the cookie.
+ * Call this on logout.
+ */
+function clearRememberMeToken($pdo): void {
+    if (isset($_SESSION['user_id'])) {
+        $stmt = $pdo->prepare("UPDATE users SET remember_token = NULL WHERE id = ?");
+        $stmt->execute([$_SESSION['user_id']]);
+    }
+
+    // Delete cookie by setting expiry in the past
+    setcookie(REMEMBER_ME_COOKIE, '', [
+        'expires'  => time() - 3600,
+        'path'     => '/',
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
+}
+

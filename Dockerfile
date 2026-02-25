@@ -1,4 +1,4 @@
-# Multi-stage Production Dockerfile for PHP Notes App
+# Multi-stage Production Dockerfile for PHP Notes App (Supabase / PostgreSQL)
 
 # ============================================
 # Stage 1: Builder - Prepare application files
@@ -26,14 +26,15 @@ RUN rm -rf \
 # ============================================
 # Stage 2: Production - Final runtime image
 # ============================================
+# Uses Supabase (PostgreSQL). Set DATABASE_URL at runtime (e.g. Supabase connection string).
 FROM php:8.2-apache AS production
 
-# Install dependencies and build PHP extensions
+# Install dependencies and PostgreSQL extension for Supabase
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libsqlite3-dev \
+    libpq-dev \
     curl \
-    && docker-php-ext-install pdo pdo_sqlite \
-    && apt-get purge -y libsqlite3-dev \
+    && docker-php-ext-install pdo pdo_pgsql \
+    && apt-get purge -y libpq-dev \
     && apt-get autoremove -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -50,11 +51,9 @@ WORKDIR /var/www/html
 # Copy application from builder stage
 COPY --from=builder /app .
 
-# Create data directory for SQLite and set permissions
-RUN mkdir -p /var/www/html/data \
-    && chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html \
-    && chmod -R 775 /var/www/html/data
+# Set ownership and permissions (database is Supabase/PostgreSQL, no local data dir)
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html
 
 # Configure PHP for production
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
