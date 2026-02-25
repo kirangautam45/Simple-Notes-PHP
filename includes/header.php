@@ -65,8 +65,22 @@ $hasFlash = isset($_SESSION['flash']);
             <?php endif; ?>
             <div class="auth-links">
                 <?php if (isLoggedIn()): ?>
-                    <span class="user-greeting">Hello, <?= sanitize($_SESSION['username']) ?></span>
-                    <a href="logout.php" class="btn btn-sm btn-logout">Logout</a>
+                    <div class="user-menu">
+                        <?php 
+                        $currentUser = getCurrentUser();
+                        $displayName = sanitize($currentUser['username']);
+                        $avatarUrl = $currentUser['profile_image'] ? sanitize($currentUser['profile_image']) : null;
+                        ?>
+                        <a href="profile.php" class="profile-link">
+                            <?php if ($avatarUrl): ?>
+                                <img src="<?= $avatarUrl ?>" alt="<?= $displayName ?>" class="nav-avatar">
+                            <?php else: ?>
+                                <span class="nav-avatar-placeholder"><?= strtoupper(substr($displayName, 0, 1)) ?></span>
+                            <?php endif; ?>
+                            <span class="username"><?= $displayName ?></span>
+                        </a>
+                        <a href="logout.php" class="btn btn-sm btn-logout">Logout</a>
+                    </div>
                 <?php else: ?>
                     <a href="login.php" class="btn btn-sm">Login</a>
                     <a href="register.php" class="btn btn-sm btn-register">Register</a>

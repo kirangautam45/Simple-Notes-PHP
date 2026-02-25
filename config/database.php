@@ -7,6 +7,10 @@
 require_once __DIR__ . '/../includes/env_loader.php';
 loadEnv(__DIR__ . '/../.env');
 
+if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
+    require_once __DIR__ . '/../vendor/autoload.php';
+}
+
 $dbUrl = getenv('DATABASE_URL');
 
 if (!$dbUrl) {
@@ -54,9 +58,22 @@ function initializeDatabase($pdo) {
             username VARCHAR(50) NOT NULL UNIQUE,
             email VARCHAR(100) NOT NULL UNIQUE,
             password VARCHAR(255) NOT NULL,
+            full_name VARCHAR(100) DEFAULT NULL,
+            bio TEXT DEFAULT NULL,
+            profile_image VARCHAR(255) DEFAULT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ");
+    
+    // Add columns if they don't exist (for existing databases)
+    try {
+        $pdo->exec("ALTER TABLE users ADD COLUMN IF NOT EXISTS full_name VARCHAR(100) DEFAULT NULL");
+        $pdo->exec("ALTER TABLE users ADD COLUMN IF NOT EXISTS bio TEXT DEFAULT NULL");
+        $pdo->exec("ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_image VARCHAR(255) DEFAULT NULL");
+    } catch (PDOException $e) {
+        // Ignore error if columns exist (generic fallback for older Postgres versions that don't support IF NOT EXISTS in ALTER)
+    }
+
 
     // Create Categories Table
     $pdo->exec("
