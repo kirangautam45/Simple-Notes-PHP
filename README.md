@@ -1,6 +1,6 @@
 # Simple Notes App - PHP CRUD Application
 
-A beginner-friendly notes application built with PHP and SQLite demonstrating fundamental web development concepts.
+A beginner-friendly notes application built with PHP and PostgreSQL demonstrating fundamental web development concepts.
 
 ## Live Demo
 
@@ -11,7 +11,7 @@ A beginner-friendly notes application built with PHP and SQLite demonstrating fu
 | Technology | Purpose |
 |------------|---------|
 | **PHP 8.2** | Backend language |
-| **SQLite** | Database (file-based, no server needed) |
+| **PostgreSQL** | Database (via Supabase) |
 | **PDO** | Database abstraction layer |
 | **HTML5/CSS3** | Frontend markup & styling |
 | **CSS Variables** | Dark/Light theme support |
@@ -41,33 +41,34 @@ notesapp/
 ├── includes/
 │   ├── header.php        # HTML header, navigation, session, theme toggle
 │   ├── footer.php        # HTML footer
-│   └── functions.php     # Helper functions (CRUD & auth operations)
+│   ├── functions.php     # Helper functions (CRUD, validation & auth)
+│   ├── noteform.php      # Reusable note form partial (shared by create & edit)
+│   └── env_loader.php    # .env file loader
 ├── css/
 │   └── style.css         # Styling (with dark mode support)
 ├── images/
 │   ├── login-illustration.svg
 │   └── register-illustration.svg
-├── data/
-│   └── notes.db          # SQLite database (auto-created)
 ├── index.php             # Home page - List all notes
-├── create.php            # Create new note form
-├── edit.php              # Edit existing note
-├── delete.php            # Delete a note
+├── note.php              # Note controller: Create / Edit / Delete
 ├── search.php            # Search results page
 ├── archive.php           # View/manage archived notes
 ├── register.php          # User registration page
 ├── login.php             # User login page
 ├── logout.php            # Logout handler
+├── test_db.php           # Database connection test script
 ├── Dockerfile            # Docker configuration for deployment
-├── render.yaml           # Render.com deployment config
+├── .env                  # Environment variables (DB credentials)
 └── README.md             # This file
 ```
 
 ## Requirements
 
-- PHP 7.4 or higher
-- SQLite3 extension (usually included with PHP)
+- PHP 8.0 or higher
+- PDO with PostgreSQL driver (`php-pgsql`)
+- A PostgreSQL database (e.g. [Supabase](https://supabase.com) free tier)
 - Web server (Apache, Nginx, or PHP built-in server)
+- A `.env` file with your `DATABASE_URL`
 
 ## Installation (Local Development)
 
@@ -99,20 +100,20 @@ docker run -p 8000:10000 -e PORT=10000 notesapp
 If you're building this from scratch, follow this order:
 
 ```
-1. config/database.php     → Database connection first
-2. includes/functions.php  → Helper functions (sanitize, redirect, flash messages)
-3. includes/header.php     → Common HTML header & navigation
-4. includes/footer.php     → Common HTML footer
-5. css/style.css          → Basic styling
-6. index.php              → Read notes (the "R" in CRUD)
-7. create.php             → Create notes (the "C" in CRUD)
-8. edit.php               → Update notes (the "U" in CRUD)
-9. delete.php             → Delete notes (the "D" in CRUD)
-10. search.php            → Search functionality
-11. archive.php           → Archive feature
-12. register.php          → User registration
-13. login.php             → User login
-14. logout.php            → Logout handler
+1. config/database.php          → Database connection first
+2. includes/env_loader.php      → Load .env variables
+3. includes/functions.php       → Helper functions (sanitize, redirect, flash, validateNoteInput)
+4. includes/header.php          → Common HTML header & navigation
+5. includes/footer.php          → Common HTML footer
+6. css/style.css                → Basic styling
+7. index.php                    → Read notes (the "R" in CRUD)
+8. includes/noteform.php        → Reusable form partial
+9. note.php                     → Create / Edit / Delete (C, U, D in CRUD) — single controller
+10. search.php                  → Search functionality
+11. archive.php                 → Archive feature
+12. register.php                → User registration
+13. login.php                   → User login
+14. logout.php                  → Logout handler
 ```
 
 ## Troubleshooting
@@ -415,89 +416,7 @@ require_once __DIR__ . '/functions.php';
 
 ---
 
-## Step 6: Create Note (create.php) - The "C" in CRUD
-
-### What You'll Learn
-
-- HTML forms with POST method
-- Form validation
-- Inserting data into database
-
-### Process Flow:
-
-```
-1. User visits create.php (GET request)
-   └── Display empty form
-
-2. User submits form (POST request)
-   ├── Validate input
-   │   ├── If errors → Show form with errors
-   │   └── If valid → Insert into DB → Redirect to index
-```
-
-### Code Explanation:
-
-```php
-<?php
-$pageTitle = 'Create Note';
-require_once 'includes/header.php';
-
-$errors = [];
-$title = '';
-$content = '';
-
-// Check if form was submitted
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Get form data
-    $title = trim($_POST['title'] ?? '');
-    $content = trim($_POST['content'] ?? '');
-    $color = $_POST['color'] ?? '#ffffff';
-    $category_id = $_POST['category_id'] ?? null;
-
-    // Validation
-    if (empty($title)) {
-        $errors['title'] = 'Title is required';
-    } elseif (strlen($title) > 255) {
-        $errors['title'] = 'Title must be less than 255 characters';
-    }
-
-    // If no errors, insert into database
-    if (empty($errors)) {
-        try {
-            $stmt = $pdo->prepare("
-                INSERT INTO notes (title, content, color, category_id)
-                VALUES (?, ?, ?, ?)
-            ");
-            $stmt->execute([$title, $content, $color, $category_id ?: null]);
-
-            setFlashMessage('success', 'Note created successfully!');
-            redirect('index.php');
-        } catch (PDOException $e) {
-            $errors['database'] = 'Failed to create note. Please try again.';
-        }
-    }
-}
-?>
-
-<!-- HTML Form -->
-<form method="POST" action="">
-    <input type="text" name="title" value="<?= sanitize($title) ?>" required>
-    <textarea name="content"><?= sanitize($content) ?></textarea>
-    <button type="submit">Create Note</button>
-</form>
-```
-
-### Key Concepts:
-
-1. **`$_SERVER['REQUEST_METHOD']`**: Check if GET or POST request
-2. **`$_POST`**: Array containing submitted form data
-3. **Null Coalescing**: `$_POST['title'] ?? ''` returns empty string if not set
-4. **INSERT Query**: Add new record to database
-5. **Form Repopulation**: Show entered values if validation fails
-
----
-
-## Step 7: Read Notes (index.php) - The "R" in CRUD
+## Step 6: Read Notes (index.php) - The "R" in CRUD
 
 ### What You'll Learn
 
@@ -519,7 +438,7 @@ $notes = getAllNotes($pdo, false);
 <?php if (empty($notes)): ?>
     <div class="empty-state">
         <h2>No Notes Yet</h2>
-        <a href="create.php">Create Note</a>
+        <a href="note.php?action=create">Create Note</a>
     </div>
 <?php else: ?>
     <div class="notes-grid">
@@ -527,8 +446,8 @@ $notes = getAllNotes($pdo, false);
             <div class="note-card" style="background-color: <?= sanitize($note['color']) ?>">
                 <h3><?= sanitize($note['title']) ?></h3>
                 <p><?= nl2br(sanitize($note['content'])) ?></p>
-                <a href="edit.php?id=<?= $note['id'] ?>">Edit</a>
-                <a href="delete.php?id=<?= $note['id'] ?>">Delete</a>
+                <a href="note.php?action=edit&id=<?= $note['id'] ?>">Edit</a>
+                <a href="note.php?action=delete&id=<?= $note['id'] ?>">Delete</a>
             </div>
         <?php endforeach; ?>
     </div>
@@ -544,111 +463,126 @@ $notes = getAllNotes($pdo, false);
 
 ---
 
-## Step 8: Update Note (edit.php) - The "U" in CRUD
+## Step 7: Reusable Form Partial (includes/noteform.php)
 
 ### What You'll Learn
 
-- Fetching single record by ID
-- Pre-filling form with existing data
-- UPDATE query
+- Extracting repeated HTML into a reusable partial
+- Passing data to a partial via variables
+- The partial naming convention (`noteform.php` lives in `includes/`)
 
-### Code:
+### Concept:
+
+Both the create and edit actions display the **same form** (title, content, category, colour picker). Instead of duplicating the HTML, we write it once in `noteform.php` and `require_once` it wherever needed.
+
+```php
+// In the caller (note.php), set variables then include the partial:
+$submitLabel = 'Create Note';           // or 'Update Note'
+require_once 'includes/noteform.php';  // renders the form
+```
+
+### Key Concepts:
+
+1. **DRY Principle**: Don't Repeat Yourself — one place to change the form
+2. **Partials**: Template fragments that are not full pages (convention: lives in `includes/`)
+3. **Variable scope**: Variables set in the caller are visible inside `require_once`
+
+---
+
+## Step 8: Note Controller (note.php) - C, U & D in CRUD
+
+### What You'll Learn
+
+- The **Front Controller** pattern — one file, multiple actions
+- Action-based routing with `?action=`
+- Shared validation helper `validateNoteInput()`
+- INSERT vs UPDATE in one place
+
+### Routes:
+
+| URL | What happens |
+|---|---|
+| `note.php?action=create` | Show empty form / handle POST → INSERT |
+| `note.php?action=edit&id=X` | Pre-fill form / handle POST → UPDATE |
+| `note.php?action=delete&id=X` | DELETE row → redirect (no form) |
+
+### Process Flow:
+
+```
+note.php
+ │
+ ├─ action=delete → DELETE query → redirect('index.php')
+ │
+ ├─ action=edit   → load note from DB
+ │                   ↓
+ └─ action=create  → (default values)
+                     ↓
+                  On POST: validateNoteInput($_POST)
+                     ├── errors?  → re-render form with errors
+                     └── clean?   → INSERT or UPDATE → redirect
+```
+
+### Code Explanation:
 
 ```php
 <?php
-$pageTitle = 'Edit Note';
-require_once 'includes/header.php';
+$action = $_GET['action'] ?? 'create';
+$id     = (int)($_GET['id'] ?? 0);
 
-// Get note ID from URL
-$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+// --- DELETE (no form needed) ---
+if ($action === 'delete') {
+    session_start();
+    require_once 'config/database.php';
+    require_once 'includes/functions.php';
 
-// Fetch existing note
-$note = getNoteById($pdo, $id);
+    $stmt = $pdo->prepare("DELETE FROM notes WHERE id = ? AND user_id = ?");
+    $stmt->execute([$id, $_SESSION['user_id']]);
 
-if (!$note) {
-    setFlashMessage('error', 'Note not found!');
+    setFlashMessage('success', 'Note deleted!');
     redirect('index.php');
 }
 
-// Pre-fill form with existing values
-$title = $note['title'];
-$content = $note['content'];
+// --- CREATE / EDIT (shared form) ---
+$pageTitle = $action === 'edit' ? 'Edit Note' : 'Create Note';
+require_once 'includes/header.php';
 
-// Handle form submission
+if ($action === 'edit') {
+    $note = getNoteById($pdo, $id);   // ownership check inside
+    $title   = $note['title'];
+    $content = $note['content'];
+    // ...
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $title = trim($_POST['title'] ?? '');
-    $content = trim($_POST['content'] ?? '');
-
-    // Validation...
+    $result = validateNoteInput($_POST);  // ← reusable helper
+    $errors = $result['errors'];
+    $data   = $result['data'];
 
     if (empty($errors)) {
-        $stmt = $pdo->prepare("
-            UPDATE notes
-            SET title = ?, content = ?, color = ?, category_id = ?
-            WHERE id = ?
-        ");
-        $stmt->execute([$title, $content, $color, $category_id, $id]);
-
-        setFlashMessage('success', 'Note updated!');
+        if ($action === 'edit') {
+            // UPDATE existing
+        } else {
+            // INSERT new
+        }
         redirect('index.php');
     }
 }
+
+$submitLabel = $action === 'edit' ? 'Update Note' : 'Create Note';
+require_once 'includes/noteform.php';  // ← shared form partial
 ```
 
 ### Key Concepts:
 
-1. **Type Casting**: `(int)$_GET['id']` ensures ID is integer (security)
-2. **UPDATE Query**: Modify existing record WHERE id matches
-3. **Pre-filling**: Show current values in form fields
+1. **Front Controller**: One file handles all actions for a resource — common in Laravel, Symfony, etc.
+2. **`?action=`**: Simple routing without a framework
+3. **`validateNoteInput()`**: Shared validation in `functions.php` — change once, fixed everywhere
+4. **`rowCount()`**: Check if DELETE actually removed a row (vs note not found)
+5. **Type Casting**: `(int)$_GET['id']` ensures the ID is always a number (prevents injection)
 
 ---
 
-## Step 9: Delete Note (delete.php) - The "D" in CRUD
-
-### What You'll Learn
-
-- DELETE query
-- Confirmation before destructive actions
-
-### Code:
-
-```php
-<?php
-session_start();
-require_once 'config/database.php';
-require_once 'includes/functions.php';
-
-$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-
-if ($id > 0) {
-    // Check if note exists first
-    $note = getNoteById($pdo, $id);
-
-    if ($note) {
-        $stmt = $pdo->prepare("DELETE FROM notes WHERE id = ?");
-        $stmt->execute([$id]);
-        setFlashMessage('success', 'Note deleted!');
-    } else {
-        setFlashMessage('error', 'Note not found!');
-    }
-}
-
-redirect('index.php');
-```
-
-### Key Concepts:
-
-1. **DELETE Query**: Remove record from database
-2. **Validate Existence**: Check if note exists before deleting
-3. **No Template**: This page only processes, then redirects
-
-### Important Security Note:
-
-In production, use POST requests for deletions, not GET. GET requests can be triggered by bots or prefetching.
-
----
-
-## Step 10: Search Functionality (search.php)
+## Step 9: Search Functionality (search.php)
 
 ### What You'll Learn
 
@@ -683,7 +617,7 @@ if (!empty($query)) {
 
 ---
 
-## Step 11: User Authentication System
+## Step 10: User Authentication System
 
 ### What You'll Learn
 

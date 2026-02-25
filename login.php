@@ -27,6 +27,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // If no errors, attempt login
     if (empty($errors)) {
         if (loginUser($pdo, $username, $password)) {
+            // Set persistent cookie if "Remember Me" was checked
+            if (!empty($_POST['remember_me'])) {
+                setRememberMeToken($pdo, $_SESSION['user_id']);
+            }
             setFlashMessage('success', 'Welcome back, ' . $_SESSION['username'] . '!');
             redirect('index.php');
         } else {
@@ -71,6 +75,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php if (isset($errors['password'])): ?>
                         <span class="error"><?= $errors['password'] ?></span>
                     <?php endif; ?>
+                </div>
+
+                <div class="form-group inline remember-me">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="remember_me" value="1"
+                               <?= !empty($_POST['remember_me']) ? 'checked' : '' ?>>
+                        <span class="checkbox-text">Remember me for 30 days</span>
+                    </label>
                 </div>
 
                 <button type="submit" class="btn btn-primary btn-block">Login</button>

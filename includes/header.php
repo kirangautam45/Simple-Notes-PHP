@@ -3,6 +3,9 @@ session_start();
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/functions.php';
 
+// Auto-login from remember-me cookie (runs on every page load)
+loginUserWithToken($pdo);
+
 // Handle theme toggle
 if (isset($_GET['toggle_theme'])) {
     $currentTheme = isset($_COOKIE['theme']) ? $_COOKIE['theme'] : 'light';
@@ -52,7 +55,7 @@ $hasFlash = isset($_SESSION['flash']);
             <?php if ($currentPage !== 'login.php' && $currentPage !== 'register.php'): ?>
             <div class="nav-links">
                 <a href="index.php" class="<?= $currentPage === 'index.php' ? 'active' : '' ?>">All Notes</a>
-                <a href="create.php" class="<?= $currentPage === 'create.php' ? 'active' : '' ?>">+ New Note</a>
+                <a href="note.php?action=create" class="<?= $currentPage === 'note.php' ? 'active' : '' ?>">+ New Note</a>
                 <a href="archive.php" class="<?= $currentPage === 'archive.php' ? 'active' : '' ?>">Archive</a>
             </div>
             <form action="search.php" method="GET" class="search-form">
