@@ -3,6 +3,9 @@ session_start();
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/functions.php';
 
+// Auto-login from remember-me cookie (runs on every page load)
+loginUserWithToken($pdo);
+
 // Handle theme toggle
 if (isset($_GET['toggle_theme'])) {
     $currentTheme = isset($_COOKIE['theme']) ? $_COOKIE['theme'] : 'light';

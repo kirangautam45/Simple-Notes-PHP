@@ -903,7 +903,7 @@ input[type='radio']:checked + .color-option {
   min-width: 70px;
 }
 
-.form-group.inline input {
+.form-group.inline input:not([type='checkbox']) {
   flex: 1;
   min-width: 300px;
 }
@@ -944,8 +944,52 @@ input[type='radio']:checked + .color-option {
   display: block;
 }
 
+/* ── Remember Me – styled checkbox ──────────────────────────── */
+.form-group.remember-me {
+  justify-content: flex-start;
+  margin-top: 2px;
+  margin-bottom: 6px;
+}
+
+.checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-label input[type='checkbox'] {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  min-width: unset;          /* override inline rule */
+  accent-color: var(--primary-color);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: box-shadow 0.2s;
+}
+
+.checkbox-label:hover input[type='checkbox'] {
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+.checkbox-text {
+  font-size: 0.88em;
+  font-weight: 500;
+  color: var(--text-light);
+  transition: color 0.2s;
+}
+
+.checkbox-label:hover .checkbox-text,
+.checkbox-label input[type='checkbox']:checked ~ .checkbox-text {
+  color: var(--text-color);
+}
+
+
 /* Submit button */
 .btn-block {
+
   width: 100%;
 }
 
