@@ -1222,8 +1222,26 @@ input[type='radio']:checked + .color-option {
 }
 
 /* Dark theme specific overrides */
+/* Note cards keep their pastel backgrounds (inline styles), so text must stay dark */
 [data-theme="dark"] .note-card {
   background: var(--card-bg);
+}
+
+[data-theme="dark"] .note-card[style*="background-color"] .note-header h3 {
+  color: #2d3748;
+}
+
+[data-theme="dark"] .note-card[style*="background-color"] .note-content {
+  color: #4a5568;
+}
+
+[data-theme="dark"] .note-card[style*="background-color"] .note-footer {
+  background: rgba(0, 0, 0, 0.08);
+  color: #2d3748;
+}
+
+[data-theme="dark"] .note-card[style*="background-color"] .note-actions a {
+  background: rgba(0, 0, 0, 0.08);
 }
 
 [data-theme="dark"] .note-content {
@@ -1312,4 +1330,9 @@ input[type='radio']:checked + .color-option {
 [data-theme="dark"] .alert-warning {
   background: rgba(251, 191, 36, 0.2);
   color: #fbbf24;
+}
+
+/* ── Profile page: hide native file input ──────────────────────── */
+.file-input-wrapper input[type="file"] {
+  display: none;
 }

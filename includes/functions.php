@@ -48,15 +48,6 @@ function formatDate($date) {
     return date('M j, Y g:i A', strtotime($date));
 }
 
-/**
- * Truncate text to specified length
- */
-function truncate($text, $length = 100) {
-    if (strlen($text) <= $length) {
-        return $text;
-    }
-    return substr($text, 0, $length) . '...';
-}
 
 /**
  * Normalize note content for display: trim lines, remove unwanted spaces, align text properly

@@ -102,13 +102,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php if ($profileImage): ?>
                         <img src="<?= htmlspecialchars($profileImage) ?>" alt="Profile" id="avatar-img" width="300" height="300">
                     <?php else: ?>
-                        <div class="avatar-placeholder"><?= strtoupper(substr($user['username'], 0, 1)) ?></div>
+                        <div class="avatar-placeholder" id="avatar-placeholder"><?= strtoupper(substr($user['username'], 0, 1)) ?></div>
+                        <img src="" alt="Profile" id="avatar-img" width="300" height="300" style="display:none;">
                     <?php endif; ?>
                 </div>
                 <div class="file-input-wrapper">
                     <label for="avatar" class="btn btn-secondary">Change Photo</label>
                     <input type="file" id="avatar" name="avatar" accept="image/*">
                 </div>
+                <script>
+                document.getElementById('avatar').addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (!file || !file.type.startsWith('image/')) return;
+
+                    const reader = new FileReader();
+                    reader.onload = function(ev) {
+                        const img = document.getElementById('avatar-img');
+                        img.src = ev.target.result;
+                        img.style.display = '';
+
+                        const placeholder = document.getElementById('avatar-placeholder');
+                        if (placeholder) placeholder.style.display = 'none';
+                    };
+                    reader.readAsDataURL(file);
+                });
+                </script>
             </div>
 
             <div class="profile-details-section">
