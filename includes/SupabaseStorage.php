@@ -42,8 +42,6 @@ class SupabaseStorage {
         $response   = curl_exec($ch);
         $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $curlError  = curl_error($ch);
-        curl_close($ch);
-
         if ($curlError) {
             error_log("SupabaseStorage upload cURL error: $curlError");
             return false;
@@ -80,8 +78,6 @@ class SupabaseStorage {
         $response   = curl_exec($ch);
         $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $curlError  = curl_error($ch);
-        curl_close($ch);
-
         if ($curlError) {
             error_log("SupabaseStorage delete cURL error: $curlError");
             return false;

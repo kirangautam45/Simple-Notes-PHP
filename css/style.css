@@ -296,14 +296,46 @@ main {
 }
 
 .note-card.pinned {
-  border: 2px solid var(--primary-color);
+  border: 2px solid var(--warning-color);
+  box-shadow: 0 0 0 3px rgba(236, 201, 75, 0.15), var(--shadow);
+}
+
+.note-card.pinned:hover {
+  box-shadow: 0 0 0 3px rgba(236, 201, 75, 0.25), var(--shadow-lg);
+}
+
+.note-card.pinned .note-header {
+  padding-right: 100px;
 }
 
 .pin-badge {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  font-size: 1.2em;
+  top: 12px;
+  right: 12px;
+  font-size: 0.72em;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #f6e05e, #ecc94b);
+  color: #744210;
+  padding: 4px 10px;
+  border-radius: 20px;
+  box-shadow: 0 2px 6px rgba(236, 201, 75, 0.4);
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  animation: pinPop 0.3s ease;
+}
+
+@keyframes pinPop {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .note-header {
@@ -334,6 +366,8 @@ main {
   white-space: pre-wrap;
   word-wrap: break-word;
   line-height: 1.6;
+  max-height: 260px;
+  overflow-y: auto;
 }
 
 .note-footer {
@@ -1188,8 +1222,26 @@ input[type='radio']:checked + .color-option {
 }
 
 /* Dark theme specific overrides */
+/* Note cards keep their pastel backgrounds (inline styles), so text must stay dark */
 [data-theme="dark"] .note-card {
   background: var(--card-bg);
+}
+
+[data-theme="dark"] .note-card[style*="background-color"] .note-header h3 {
+  color: #2d3748;
+}
+
+[data-theme="dark"] .note-card[style*="background-color"] .note-content {
+  color: #4a5568;
+}
+
+[data-theme="dark"] .note-card[style*="background-color"] .note-footer {
+  background: rgba(0, 0, 0, 0.08);
+  color: #2d3748;
+}
+
+[data-theme="dark"] .note-card[style*="background-color"] .note-actions a {
+  background: rgba(0, 0, 0, 0.08);
 }
 
 [data-theme="dark"] .note-content {
@@ -1278,4 +1330,9 @@ input[type='radio']:checked + .color-option {
 [data-theme="dark"] .alert-warning {
   background: rgba(251, 191, 36, 0.2);
   color: #fbbf24;
+}
+
+/* ── Profile page: hide native file input ──────────────────────── */
+.file-input-wrapper input[type="file"] {
+  display: none;
 }

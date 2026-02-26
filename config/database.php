@@ -7,10 +7,6 @@
 require_once __DIR__ . '/../includes/env_loader.php';
 loadEnv(__DIR__ . '/../.env');
 
-if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
-    require_once __DIR__ . '/../vendor/autoload.php';
-}
-
 $dbUrl = getenv('DATABASE_URL');
 
 if (!$dbUrl) {

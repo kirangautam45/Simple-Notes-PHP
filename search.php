@@ -57,7 +57,7 @@ if (!empty($query)) {
                 </div>
 
                 <div class="note-content">
-                    <?= nl2br(sanitize(truncate($note['content'], 150))) ?>
+                    <?= nl2br(sanitize(normalizeNoteContentForDisplay($note['content']))) ?>
                 </div>
 
                 <div class="note-footer">

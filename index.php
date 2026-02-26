@@ -53,7 +53,7 @@ $pinnedNotes = count(array_filter($notes, fn($n) => $n['is_pinned']));
                  style="background-color: <?= sanitize($note['color']) ?>">
 
                 <?php if ($note['is_pinned']): ?>
-                    <span class="pin-badge" title="Pinned">Pinned</span>
+                    <span class="pin-badge" title="Pinned">📌 Pinned</span>
                 <?php endif; ?>
 
                 <div class="note-header">
@@ -67,7 +67,7 @@ $pinnedNotes = count(array_filter($notes, fn($n) => $n['is_pinned']));
                 </div>
 
                 <div class="note-content">
-                    <?= nl2br(sanitize(truncate($note['content'], 150))) ?>
+                    <?= nl2br(sanitize(normalizeNoteContentForDisplay($note['content']))) ?>
                 </div>
 
                 <div class="note-footer">

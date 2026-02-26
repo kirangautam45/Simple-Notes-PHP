@@ -48,14 +48,23 @@ function formatDate($date) {
     return date('M j, Y g:i A', strtotime($date));
 }
 
+
 /**
- * Truncate text to specified length
+ * Normalize note content for display: trim lines, remove unwanted spaces, align text properly
  */
-function truncate($text, $length = 100) {
-    if (strlen($text) <= $length) {
-        return $text;
+function normalizeNoteContentForDisplay($content) {
+    if ($content === null || $content === '') {
+        return '';
     }
-    return substr($text, 0, $length) . '...';
+    $content = trim($content);
+    $lines = explode("\n", $content);
+    $normalized = [];
+    foreach ($lines as $line) {
+        $line = trim($line);
+        $line = preg_replace('/\s+/', ' ', $line); // collapse multiple spaces to one
+        $normalized[] = $line;
+    }
+    return implode("\n", $normalized);
 }
 
 /**
@@ -143,7 +152,7 @@ function searchNotes($pdo, $query) {
  * Toggle pin status
  */
 function togglePin($pdo, $id) {
-    $stmt = $pdo->prepare("UPDATE notes SET is_pinned = NOT is_pinned WHERE id = ?");
+    $stmt = $pdo->prepare("UPDATE notes SET is_pinned = 1 - is_pinned WHERE id = ?");
     return $stmt->execute([$id]);
 }
 
@@ -319,6 +328,9 @@ function validateNoteInput(array $post): array {
         'category_id' => $post['category_id'] ?: null,
     ];
 
+    // Remove unwanted spaces and align content properly before save
+    $data['content'] = normalizeNoteContentForDisplay($data['content']);
+
     $errors = [];
 
     if (empty($data['title'])) {
@@ -383,9 +395,10 @@ function loginUserWithToken($pdo): void {
 
     if ($user) {
         // Restore session (same as loginUser)
-        $_SESSION['user_id']  = $user['id'];
-        $_SESSION['username'] = $user['username'];
-        $_SESSION['email']    = $user['email'];
+        $_SESSION['user_id']       = $user['id'];
+        $_SESSION['username']      = $user['username'];
+        $_SESSION['email']         = $user['email'];
+        $_SESSION['profile_image'] = $user['profile_image'] ?? null;
 
         // Rotate token on each use (prevents token reuse if cookie is stolen)
         setRememberMeToken($pdo, $user['id']);
