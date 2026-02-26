@@ -59,6 +59,24 @@ function truncate($text, $length = 100) {
 }
 
 /**
+ * Normalize note content for display: trim lines, remove unwanted spaces, align text properly
+ */
+function normalizeNoteContentForDisplay($content) {
+    if ($content === null || $content === '') {
+        return '';
+    }
+    $content = trim($content);
+    $lines = explode("\n", $content);
+    $normalized = [];
+    foreach ($lines as $line) {
+        $line = trim($line);
+        $line = preg_replace('/\s+/', ' ', $line); // collapse multiple spaces to one
+        $normalized[] = $line;
+    }
+    return implode("\n", $normalized);
+}
+
+/**
  * Get all notes for current user
  */
 function getAllNotes($pdo, $archived = false) {
@@ -143,7 +161,7 @@ function searchNotes($pdo, $query) {
  * Toggle pin status
  */
 function togglePin($pdo, $id) {
-    $stmt = $pdo->prepare("UPDATE notes SET is_pinned = NOT is_pinned WHERE id = ?");
+    $stmt = $pdo->prepare("UPDATE notes SET is_pinned = 1 - is_pinned WHERE id = ?");
     return $stmt->execute([$id]);
 }
 
@@ -318,6 +336,9 @@ function validateNoteInput(array $post): array {
         'color'       => $post['color']             ?? '#ffffff',
         'category_id' => $post['category_id'] ?: null,
     ];
+
+    // Remove unwanted spaces and align content properly before save
+    $data['content'] = normalizeNoteContentForDisplay($data['content']);
 
     $errors = [];
 

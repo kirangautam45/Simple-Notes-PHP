@@ -63,9 +63,9 @@ if ($action === 'edit') {
         redirect('index.php');
     }
 
-    // Seed form from the database record
+    // Seed form from the database record (content normalized for clean display in textarea)
     $title       = $note['title'];
-    $content     = $note['content'];
+    $content     = normalizeNoteContentForDisplay($note['content']);
     $color       = $note['color'];
     $category_id = $note['category_id'];
 }
