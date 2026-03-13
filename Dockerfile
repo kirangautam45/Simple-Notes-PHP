@@ -69,6 +69,7 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
 # Production PHP optimizations
 RUN { \
+    echo "extension=pdo_pgsql.so"; \
     echo "expose_php = Off"; \
     echo "display_errors = Off"; \
     echo "log_errors = On"; \
