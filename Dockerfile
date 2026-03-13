@@ -36,7 +36,7 @@ FROM php:8.2-apache
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     curl \
-    && docker-php-ext-install pdo pdo_pgsql opcache \
+    && docker-php-ext-install pdo_pgsql opcache \
     && apt-get remove -y libpq-dev \
     && apt-get autoremove -y \
     && apt-get clean \
