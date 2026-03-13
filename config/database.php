@@ -24,6 +24,11 @@ $password = $parts['pass'];
 
 $dsn = "pgsql:host=$host;port=$port;dbname=$dbname";
 
+// Check if PostgreSQL driver is available
+if (!in_array('pgsql', PDO::getAvailableDrivers())) {
+    die("Database connection failed: PostgreSQL PDO driver not found. Available drivers: " . implode(', ', PDO::getAvailableDrivers()));
+}
+
 try {
     $pdo = new PDO(
         $dsn,
