@@ -42,8 +42,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Enable Apache modules
-RUN a2enmod rewrite headers
+# Enable Apache modules and ensure only one MPM is active
+RUN a2dismod mpm_event mpm_worker || true \
+    && a2enmod mpm_prefork rewrite headers
 
 # Configure Apache to listen on PORT env var (required by Render)
 RUN sed -i 's/80/${PORT}/g' /etc/apache2/sites-available/000-default.conf /etc/apache2/ports.conf
