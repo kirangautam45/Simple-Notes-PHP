@@ -46,8 +46,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN rm -f /etc/apache2/mods-enabled/mpm_event.load /etc/apache2/mods-enabled/mpm_worker.load
 
 # Enable Apache modules and ensure only one MPM is active
-RUN a2dismod mpm_event mpm_worker && \
-    a2enmod mpm_prefork rewrite headers
+RUN a2dismod mpm_event; a2dismod mpm_worker; a2enmod mpm_prefork rewrite headers
 
 # Railway requires PORT env variable
 ENV PORT=8080
