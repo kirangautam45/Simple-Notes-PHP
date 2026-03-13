@@ -1,7 +1,10 @@
 # ============================================
 # Stage 1: Builder - Prepare application files
 # ============================================
-FROM php:8.2-cli-alpine AS builder
+FROM php:8.2-cli-alpine3.20 AS builder
+
+# Install security updates and remove build tools
+RUN apk update && apk upgrade --no-cache && rm -rf /var/cache/apk/*
 
 WORKDIR /app
 
@@ -40,8 +43,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Enable Apache modules and ensure only one MPM is active
-RUN a2dismod mpm_event mpm_worker || true \
-    && a2enmod mpm_prefork rewrite headers
+RUN a2dismod mpm_event mpm_worker && \
+    a2enmod mpm_prefork rewrite headers
 
 # Railway requires PORT env variable
 ENV PORT=8080
